@@ -8,7 +8,6 @@ import by.lobacevich.order.repository.ItemRepository;
 import by.lobacevich.order.service.OrderItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,7 +19,6 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     private final ItemRepository itemRepository;
 
-    @Transactional
     @Override
     public List<OrderItem> buildOrderItems(List<OrderItemDtoRequest> dtoRequestList, Order order) {
         return dtoRequestList.stream()

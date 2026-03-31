@@ -11,10 +11,12 @@ import by.lobacevich.order.entity.enums.OrderStatus;
 import by.lobacevich.order.exception.EntityNotFoundException;
 import by.lobacevich.order.mapper.OrderMapper;
 import by.lobacevich.order.repository.OrderRepository;
+import by.lobacevich.order.security.SecurityUtils;
 import by.lobacevich.order.service.OrderItemService;
 import by.lobacevich.order.service.OrderService;
 import by.lobacevich.order.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +24,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
+@Log4j2
 @RequiredArgsConstructor
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -33,7 +36,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper mapper;
     private final OrderItemService orderItemService;
 
-    @Transactional
     @Override
     public OrderDtoResponseFull create(OrderCreateDtoRequest dtoRequest) {
         Order order = new Order();
@@ -65,8 +67,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDtoResponse> getAll(Boolean deleted,
                                          List<OrderStatus> statuses,
-                                         LocalDateTime from,
-                                         LocalDateTime to,
+                                         LocalDate from,
+                                         LocalDate to,
                                          int number,
                                          int size) {
         Pageable pageable = PageRequest.of(number, size);
@@ -96,5 +98,11 @@ public class OrderServiceImpl implements OrderService {
         if (repository.delete(id) == 0) {
             throw new EntityNotFoundException("Order not found with id " + id);
         }
+    }
+
+    public boolean isOwner(Long id) {
+        Order order = repository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("Order not found with id " + id));
+        return SecurityUtils.getPrincipal().userId().equals(order.getUserId());
     }
 }

@@ -4,6 +4,7 @@ import by.lobacevich.order.entity.Order;
 import by.lobacevich.order.entity.enums.OrderStatus;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,8 +29,8 @@ public class OrderSpecification {
                 : root.get(STATUS).in(statuses);
     }
 
-    public static Specification<Order> createdBetween(LocalDateTime from,
-                                                      LocalDateTime to) {
+    public static Specification<Order> createdBetween(LocalDate from,
+                                                      LocalDate to) {
         return (root, query, cb) -> {
             if (from == null && to == null) {
                 return cb.conjunction();
@@ -44,8 +45,8 @@ public class OrderSpecification {
 
     public static Specification<Order> filterBy(Boolean deleted,
                                                 List<OrderStatus> statuses,
-                                                LocalDateTime from,
-                                                LocalDateTime to) {
+                                                LocalDate from,
+                                                LocalDate to) {
         return notDeleted(deleted)
                 .and(hasStatus(statuses))
                 .and(createdBetween(from, to));

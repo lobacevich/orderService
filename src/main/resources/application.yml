@@ -13,12 +13,13 @@ spring:
 
   liquibase:
     enabled: true
-    drop-first: false
+    drop-first: true
     change-log: classpath:db/changelog/changelog.yaml
 
   jpa:
     hibernate.ddl-auto: none
     show-sql: true
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
@@ -26,7 +27,9 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    spring: WARN
+    spring: INFO
   file:
     name: logs/log.log
+
+jwt:
+  secret: ${JWT_SECRET}

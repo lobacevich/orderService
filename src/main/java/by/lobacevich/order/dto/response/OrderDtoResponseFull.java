@@ -1,5 +1,7 @@
 package by.lobacevich.order.dto.response;
 
+import by.lobacevich.order.dto.UserInfo;
+
 import java.util.List;
 
 public record OrderDtoResponseFull(Long id,
@@ -9,5 +11,6 @@ public record OrderDtoResponseFull(Long id,
                                    boolean deleted,
                                    String createdAt,
                                    String updatedAt,
+                                   UserInfo userInfo,
                                    List<OrderItemDtoResponse> orderItems) {
 }

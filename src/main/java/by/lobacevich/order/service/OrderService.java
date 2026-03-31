@@ -8,7 +8,7 @@ import by.lobacevich.order.dto.response.OrderDtoResponseFull;
 import by.lobacevich.order.entity.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface OrderService {
@@ -20,8 +20,8 @@ public interface OrderService {
 
     Page<OrderDtoResponse> getAll(Boolean deleted,
                                   List<OrderStatus> statuses,
-                                  LocalDateTime from,
-                                  LocalDateTime to,
+                                  LocalDate from,
+                                  LocalDate to,
                                   int number,
                                   int size);
 
