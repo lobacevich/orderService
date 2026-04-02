@@ -7,7 +7,22 @@ public class SecurityUtils {
     private SecurityUtils() {
     }
 
-    public static UserPrincipal getPrincipal() {
-        return (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public static Long getCurrentUserId() {
+        return ((UserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal())
+                .userId();
+    }
+
+    public static String getCurrentRole() {
+        return SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .stream()
+                .findFirst()
+                .get()
+                .getAuthority();
     }
 }

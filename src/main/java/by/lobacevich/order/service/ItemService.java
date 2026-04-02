@@ -5,9 +5,8 @@ import by.lobacevich.order.dto.response.ItemDtoResponse;
 import org.springframework.data.domain.Page;
 
 public interface ItemService {
-    ItemDtoResponse create(ItemDtoRequest dtoRequest);
 
-    ItemDtoResponse update(ItemDtoRequest dtoRequest, Long id);
+    ItemDtoResponse create(ItemDtoRequest dtoRequest);
 
     ItemDtoResponse getById(Long id);
 

@@ -1,14 +1,12 @@
 package by.lobacevich.order.controller;
 
-import by.lobacevich.order.dto.request.OrderCreateDtoRequest;
-import by.lobacevich.order.dto.request.OrderUpdateDtoRequest;
+import by.lobacevich.order.dto.request.OrderDtoRequest;
 import by.lobacevich.order.dto.request.StatusDtoRequest;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
 import by.lobacevich.order.dto.response.OrderDtoResponseFull;
 import by.lobacevich.order.entity.enums.OrderStatus;
 import by.lobacevich.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +39,7 @@ public class OrderController {
 
     @Operation(
             summary = "Get order by ID",
-            description = "Retrieves a single order by its ID. Requires ADMIN role or ownership.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            description = "Retrieves a single order by its ID. Requires ADMIN role or ownership."
     )
     @PreAuthorize("hasRole('ADMIN') or @orderServiceImpl.isOwner(#id)")
     @GetMapping("/{id}")
@@ -52,8 +49,7 @@ public class OrderController {
 
     @Operation(
             summary = "Get all orders (paginated)",
-            description = "Retrieves a page of orders with optional filters. Requires ADMIN role.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            description = "Retrieves a page of orders with optional filters. Requires ADMIN role."
     )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
@@ -69,8 +65,7 @@ public class OrderController {
 
     @Operation(
             summary = "Get orders by user ID",
-            description = "Retrieves all orders for a given user. Requires ADMIN role or ownership.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            description = "Retrieves all orders for a given user. Requires ADMIN role or ownership."
     )
     @PreAuthorize("hasRole('ADMIN') or #id == principal.userId()")
     @GetMapping("/user/{id}")
@@ -80,19 +75,17 @@ public class OrderController {
 
     @Operation(
             summary = "Create a new order",
-            description = "Creates a new order with the given details. Requires ADMIN role or the authenticated user's ID matches the order's userId.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            description = "Creates a new order with the given details. Requires ADMIN role or the authenticated user's ID matches the order's userId."
     )
     @PreAuthorize("hasRole('ADMIN') or #dtoRequest.userId() == principal.userId()")
     @PostMapping
-    public ResponseEntity<OrderDtoResponseFull> create(@Valid @RequestBody OrderCreateDtoRequest dtoRequest) {
+    public ResponseEntity<OrderDtoResponseFull> create(@Valid @RequestBody OrderDtoRequest dtoRequest) {
         return new ResponseEntity<>(service.create(dtoRequest), HttpStatus.CREATED);
     }
 
     @Operation(
             summary = "Update order status",
-            description = "Updates the status of an existing order. Requires ADMIN role.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            description = "Updates the status of an existing order. Requires ADMIN role."
     )
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
@@ -104,8 +97,7 @@ public class OrderController {
 
     @Operation(
             summary = "Delete order",
-            description = "Soft-deletes an order by ID. Requires ADMIN role.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            description = "Soft-deletes an order by ID. Requires ADMIN role."
     )
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -116,12 +108,11 @@ public class OrderController {
 
     @Operation(
             summary = "Update order",
-            description = "Fully updates an existing order. Requires ADMIN role or ownership.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            description = "Fully updates an existing order. Requires ADMIN role or ownership."
     )
     @PreAuthorize("hasRole('ADMIN') or @orderServiceImpl.isOwner(#id)")
     @PutMapping("/{id}")
-    public ResponseEntity<OrderDtoResponseFull> update(@Valid @RequestBody OrderUpdateDtoRequest dtoRequest,
+    public ResponseEntity<OrderDtoResponseFull> update(@Valid @RequestBody OrderDtoRequest dtoRequest,
                                                        @PathVariable Long id) {
         return ResponseEntity.ok(service.update(dtoRequest, id));
     }

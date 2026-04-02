@@ -1,7 +1,6 @@
 package by.lobacevich.order.service;
 
-import by.lobacevich.order.dto.request.OrderCreateDtoRequest;
-import by.lobacevich.order.dto.request.OrderUpdateDtoRequest;
+import by.lobacevich.order.dto.request.OrderDtoRequest;
 import by.lobacevich.order.dto.request.StatusDtoRequest;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
 import by.lobacevich.order.dto.response.OrderDtoResponseFull;
@@ -12,9 +11,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface OrderService {
-    OrderDtoResponseFull create(OrderCreateDtoRequest dtoRequest);
+    OrderDtoResponseFull create(OrderDtoRequest dtoRequest);
 
-    OrderDtoResponseFull update(OrderUpdateDtoRequest dtoRequest, Long id);
+    OrderDtoResponseFull update(OrderDtoRequest dtoRequest, Long id);
 
     OrderDtoResponseFull getById(Long id);
 

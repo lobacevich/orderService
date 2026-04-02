@@ -1,7 +1,6 @@
 package by.lobacevich.order.service.impl;
 
-import by.lobacevich.order.dto.request.OrderCreateDtoRequest;
-import by.lobacevich.order.dto.request.OrderUpdateDtoRequest;
+import by.lobacevich.order.dto.request.OrderDtoRequest;
 import by.lobacevich.order.dto.request.StatusDtoRequest;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
 import by.lobacevich.order.dto.response.OrderDtoResponseFull;
@@ -36,10 +35,11 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper mapper;
     private final OrderItemService orderItemService;
 
+    @Transactional
     @Override
-    public OrderDtoResponseFull create(OrderCreateDtoRequest dtoRequest) {
+    public OrderDtoResponseFull create(OrderDtoRequest dtoRequest) {
         Order order = new Order();
-        order.setUserId(dtoRequest.userId());
+        order.setUserId(SecurityUtils.getCurrentUserId());
         List<OrderItem> orderItems = orderItemService.buildOrderItems(dtoRequest.orderItems(), order);
         order.setOrderItems(orderItems);
         order.setTotalPrice(orderItemService.calculateTotalPrice(orderItems));
@@ -48,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public OrderDtoResponseFull update(OrderUpdateDtoRequest dtoRequest, Long id) {
+    public OrderDtoResponseFull update(OrderDtoRequest dtoRequest, Long id) {
         Order order = repository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Order not found with id " + id));
         List<OrderItem> orderItems = order.getOrderItems();
@@ -103,6 +103,6 @@ public class OrderServiceImpl implements OrderService {
     public boolean isOwner(Long id) {
         Order order = repository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Order not found with id " + id));
-        return SecurityUtils.getPrincipal().userId().equals(order.getUserId());
+        return SecurityUtils.getCurrentUserId().equals(order.getUserId());
     }
 }

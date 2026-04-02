@@ -33,9 +33,10 @@ jobs:
 
       - name: SonarQube analysis
         run: ./gradlew sonar
-          -Dsonar.organization=lobacevich-1 
+          -Dsonar.organization=lobacevich
           -Dsonar.projectKey=lobacevich_orderService 
           -Dsonar.branch.name=${{ github.ref_name }}
+          -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

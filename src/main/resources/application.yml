@@ -28,8 +28,18 @@ spring:
 logging:
   level:
     spring: INFO
+    io.github.resilience4j.circuitbreaker: DEBUG
   file:
     name: logs/log.log
 
 jwt:
   secret: ${JWT_SECRET}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3

@@ -1,5 +1,4 @@
 package by.lobacevich.order.security;
 
-public record UserPrincipal(Long userId,
-                            String token) {
+public record UserPrincipal(Long userId, String role) {
 }
