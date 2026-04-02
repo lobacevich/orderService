@@ -75,9 +75,8 @@ public class OrderController {
 
     @Operation(
             summary = "Create a new order",
-            description = "Creates a new order with the given details. Requires ADMIN role or the authenticated user's ID matches the order's userId."
+            description = "Creates a new order with the given details. Requires authentication"
     )
-    @PreAuthorize("hasRole('ADMIN') or #dtoRequest.userId() == principal.userId()")
     @PostMapping
     public ResponseEntity<OrderDtoResponseFull> create(@Valid @RequestBody OrderDtoRequest dtoRequest) {
         return new ResponseEntity<>(service.create(dtoRequest), HttpStatus.CREATED);

@@ -29,7 +29,7 @@ public class ItemController {
 
     @Operation(
             summary = "Get item by ID",
-            description = "Retrieves a single item by its ID. Public endpoint."
+            description = "Retrieves a single item by its ID. Requires authentication."
     )
     @GetMapping("/{id}")
     public ResponseEntity<ItemDtoResponse> getById(@PathVariable Long id) {
@@ -38,7 +38,7 @@ public class ItemController {
 
     @Operation(
             summary = "Get all items (paginated)",
-            description = "Retrieves a page of items. Public endpoint."
+            description = "Retrieves a page of items. Requires authentication."
     )
     @GetMapping
     public ResponseEntity<Page<ItemDtoResponse>> getAll(

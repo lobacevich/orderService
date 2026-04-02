@@ -4,6 +4,7 @@ import by.lobacevich.order.dto.UserInfo;
 import by.lobacevich.order.security.SecurityUtils;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -11,15 +12,18 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class UserClient {
 
-    public static final String URL = "http://localhost:8082/users/{id}";
     private static final String HEADER_USER_ID = "X-User-Id";
-    public static final String HEADER_ROLE = "X-Role";
+    private static final String HEADER_ROLE = "X-Role";
+
+    @Value("${userClient.url}")
+    private String baseUrl;
 
     @CircuitBreaker(name = "userService", fallbackMethod = "fallBackUser")
     public UserInfo getUserById(Long id) {
-        WebClient webClient = WebClient.builder().build();
+        WebClient webClient = WebClient.builder()
+                .baseUrl(baseUrl).build();
         return webClient.get()
-                .uri(URL, id)
+                .uri("/users/{id}", id)
                 .header(HEADER_USER_ID, String.valueOf(SecurityUtils.getCurrentUserId()))
                 .header(HEADER_ROLE, SecurityUtils.getCurrentRole())
                 .retrieve()
