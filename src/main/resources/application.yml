@@ -13,7 +13,7 @@ spring:
 
   liquibase:
     enabled: true
-    drop-first: false
+    drop-first: true
     change-log: classpath:db/changelog/changelog.yaml
 
   jpa:

@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-public class ItemControllerIT extends BaseIntegrationTest {
+class ItemControllerIT extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

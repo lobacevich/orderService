@@ -1,7 +1,7 @@
 package by.lobacevich.order.service.impl;
 
 import by.lobacevich.order.client.UserClient;
-import by.lobacevich.order.dto.UserInfo;
+import by.lobacevich.order.dto.response.UserInfo;
 import by.lobacevich.order.dto.request.OrderDtoRequest;
 import by.lobacevich.order.dto.request.StatusDtoRequest;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    private static final String MESSAGE_NOT_FOUND = "Order not found with id ";
+
     private final OrderRepository repository;
     private final OrderMapper mapper;
     private final OrderItemService orderItemService;
@@ -56,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDtoResponseFull update(OrderDtoRequest dtoRequest, Long id) {
         Order order = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Order not found with id " + id));
+                new EntityNotFoundException(MESSAGE_NOT_FOUND + id));
         List<OrderItem> orderItems = order.getOrderItems();
         orderItems.clear();
         orderItems.addAll(orderItemService.buildOrderItems(dtoRequest.orderItems(), order));
@@ -67,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDtoResponseFull getById(Long id) {
         return mapper.entityToDtoFull(repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Order not found with id " + id)));
+                new EntityNotFoundException(MESSAGE_NOT_FOUND + id)));
     }
 
     @Override
@@ -107,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDtoResponseFull setStatus(StatusDtoRequest statusDtoRequest, Long id) {
         Order order = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Order not found with id " + id));
+                new EntityNotFoundException(MESSAGE_NOT_FOUND + id));
         order.setStatus(statusDtoRequest.status());
         return mapper.entityToDtoFull(repository.save(order));
     }
@@ -116,13 +118,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void delete(Long id) {
         if (repository.delete(id) == 0) {
-            throw new EntityNotFoundException("Order not found with id " + id);
+            throw new EntityNotFoundException(MESSAGE_NOT_FOUND + id);
         }
     }
 
     public boolean isOwner(Long id) {
         Order order = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Order not found with id " + id));
+                new EntityNotFoundException(MESSAGE_NOT_FOUND + id));
         return SecurityUtils.getCurrentUserId().equals(order.getUserId());
     }
 }

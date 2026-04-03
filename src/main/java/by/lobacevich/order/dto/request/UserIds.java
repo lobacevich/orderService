@@ -1,4 +1,4 @@
-package by.lobacevich.order.dto;
+package by.lobacevich.order.dto.request;
 
 import java.util.List;
 

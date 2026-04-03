@@ -16,7 +16,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,10 +68,12 @@ class OrderItemServiceImplTest {
 
     @Test
     void buildOrderItems_ShouldThrowEntityNotFoundException() {
+        List<OrderItemDtoRequest> list = List.of(dtoRequest);
+
         when(dtoRequest.itemId()).thenReturn(ID);
         when(itemRepository.findById(ID)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> service.buildOrderItems(List.of(dtoRequest), order));
+        assertThrows(EntityNotFoundException.class, () -> service.buildOrderItems(list, order));
     }
 
     @Test

@@ -22,7 +22,7 @@ public class SecurityUtils {
                 .getAuthorities()
                 .stream()
                 .findFirst()
-                .get()
+                .orElseThrow()
                 .getAuthority();
     }
 }

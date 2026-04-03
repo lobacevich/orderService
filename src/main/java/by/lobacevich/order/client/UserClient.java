@@ -1,7 +1,7 @@
 package by.lobacevich.order.client;
 
-import by.lobacevich.order.dto.UserIds;
-import by.lobacevich.order.dto.UserInfo;
+import by.lobacevich.order.dto.request.UserIds;
+import by.lobacevich.order.dto.response.UserInfo;
 import by.lobacevich.order.security.SecurityUtils;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class UserClient {
     }
 
     private UserInfo fallBackUser(Long id, Throwable e) {
-        log.warn("{}, {}, {}", e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
+        log.warn("{}, {}, {}, {}", id, e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
         return null;
     }
 
@@ -52,7 +52,7 @@ public class UserClient {
     }
 
     private List<UserInfo> fallBackUsers(List<Long> ids, Throwable e) {
-        log.warn("{}, {}, {}", e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
+        log.warn("{}, {}, {}, {}",ids, e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
         return Collections.emptyList();
     }
 }

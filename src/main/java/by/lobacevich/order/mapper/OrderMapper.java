@@ -1,7 +1,7 @@
 package by.lobacevich.order.mapper;
 
 import by.lobacevich.order.client.UserClient;
-import by.lobacevich.order.dto.UserInfo;
+import by.lobacevich.order.dto.response.UserInfo;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
 import by.lobacevich.order.dto.response.OrderDtoResponseFull;
 import by.lobacevich.order.entity.Order;
@@ -13,12 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class OrderMapper {
 
-    @Autowired
+    @Autowired //NOSONAR
     private UserClient userClient;
 
     @Mapping(target = "userInfo", expression = "java(getUserInfo(order.getUserId()))")
     public abstract OrderDtoResponseFull entityToDtoFull(Order order);
-    
+
     @Mapping(target = "userInfo", source = "user")
     @Mapping(target = "id", source = "order.id")
     @Mapping(target = "createdAt", source = "order.createdAt")

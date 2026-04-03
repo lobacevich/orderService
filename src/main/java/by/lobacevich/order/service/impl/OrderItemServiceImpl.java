@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -30,7 +29,7 @@ public class OrderItemServiceImpl implements OrderItemService {
                             new EntityNotFoundException("Item not found with id " + orderItemDto.itemId())));
                     return orderItem;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

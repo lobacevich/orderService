@@ -1,4 +1,4 @@
-package by.lobacevich.order.dto;
+package by.lobacevich.order.dto.response;
 
 public record UserInfo(Long id,
                        String name,

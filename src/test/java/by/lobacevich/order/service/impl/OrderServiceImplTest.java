@@ -144,7 +144,7 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void getByIdShouldThrowEntityNotFoundException() {
+    void getById_ShouldThrowEntityNotFoundException() {
         when(repository.findById(ID)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> service.getById(ID));
@@ -190,9 +190,11 @@ class OrderServiceImplTest {
 
     @Test
     void setStatus_ShouldThrowEntityNotFoundException() {
+        StatusDtoRequest statusDtoRequest = new StatusDtoRequest(OrderStatus.PAID);
+
         when(repository.findById(ID)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> service.getById(ID));
+        assertThrows(EntityNotFoundException.class, () -> service.setStatus(statusDtoRequest, ID));
     }
 
     @Test

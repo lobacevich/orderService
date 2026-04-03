@@ -18,6 +18,8 @@ import java.util.List;
 @RestControllerAdvice
 public class AppExceptionHandler {
 
+    private static final String ERROR_LOG_FRAME = "{}, {}, {}";
+
     @ExceptionHandler
     public ResponseEntity<ErrorDto> handleEntityNotFoundException(EntityNotFoundException e) {
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND);
@@ -30,25 +32,25 @@ public class AppExceptionHandler {
                 .stream()
                 .map(FieldError::getDefaultMessage)
                 .toList();
-        log.error("{}, {}, {}", e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
+        log.error(ERROR_LOG_FRAME, e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
         return new ResponseEntity<>(new ErrorDto(String.join(", ", errors)), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
     public ResponseEntity<ErrorDto> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.error("{}, {}, {}", e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
+        log.error(ERROR_LOG_FRAME, e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
     public ResponseEntity<ErrorDto> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
-        log.error("{}/{}", e.getMessage(), e.getClass().getSimpleName());
+        log.error("{}, {}", e.getMessage(), e.getClass().getSimpleName());
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler
     public ResponseEntity<ErrorDto> handleException(Exception e) {
-        log.error("{}, {}, {}", e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
+        log.error(ERROR_LOG_FRAME, e.getMessage(), e.getClass().getSimpleName(), e.getStackTrace());
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
