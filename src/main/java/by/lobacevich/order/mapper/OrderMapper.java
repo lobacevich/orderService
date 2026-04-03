@@ -18,9 +18,12 @@ public abstract class OrderMapper {
 
     @Mapping(target = "userInfo", expression = "java(getUserInfo(order.getUserId()))")
     public abstract OrderDtoResponseFull entityToDtoFull(Order order);
-
-    @Mapping(target = "userInfo", expression = "java(getUserInfo(order.getUserId()))")
-    public abstract OrderDtoResponse entityToDto(Order order);
+    
+    @Mapping(target = "userInfo", source = "user")
+    @Mapping(target = "id", source = "order.id")
+    @Mapping(target = "createdAt", source = "order.createdAt")
+    @Mapping(target = "updatedAt", source = "order.updatedAt")
+    public abstract OrderDtoResponse entityToDto(Order order, UserInfo user);
 
     UserInfo getUserInfo(Long id) {
         return userClient.getUserById(id);

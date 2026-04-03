@@ -34,7 +34,7 @@ public class OrderControllerIT extends BaseIntegrationTest {
 
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
-        registry.add("userClient.url", () -> wireMock.baseUrl());
+        registry.add("webClient.url", () -> wireMock.baseUrl());
     }
 
     @BeforeEach
@@ -108,11 +108,16 @@ public class OrderControllerIT extends BaseIntegrationTest {
 
     @Test
     void getAll_ShouldReturnListOfOrderDtoResponse() throws Exception {
+        wireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/users/batch"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)));
         mockMvc.perform(get("/orders")
                         .header("X-User-Id", "1")
                         .header("X-Role", "ROLE_ADMIN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray());
+
+        wireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/users/batch")));
     }
 
     @Test
@@ -130,6 +135,8 @@ public class OrderControllerIT extends BaseIntegrationTest {
                         .header("X-Role", "ROLE_ADMIN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+
+        wireMock.verify(1, WireMock.getRequestedFor(WireMock.urlEqualTo("/users/1")));
     }
 
 

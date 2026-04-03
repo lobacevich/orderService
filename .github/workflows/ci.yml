@@ -50,9 +50,9 @@ jobs:
 #      - name: Build Image
 #        env:
 #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-#        run: docker build -t $DOCKER_USERNAME/user-service:latest .
+#        run: docker build -t $DOCKER_USERNAME/order-service:latest .
 #
 #      - name: Push Image
 #        env:
 #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-#        run: docker push $DOCKER_USERNAME/user-service:latest
+#        run: docker push $DOCKER_USERNAME/order-service:latest

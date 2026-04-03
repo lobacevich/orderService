@@ -1,5 +1,7 @@
 package by.lobacevich.order.service.impl;
 
+import by.lobacevich.order.client.UserClient;
+import by.lobacevich.order.dto.UserInfo;
 import by.lobacevich.order.dto.request.OrderDtoRequest;
 import by.lobacevich.order.dto.request.StatusDtoRequest;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
@@ -17,6 +19,7 @@ import by.lobacevich.order.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -34,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository repository;
     private final OrderMapper mapper;
     private final OrderItemService orderItemService;
+    private final UserClient userClient;
 
     @Transactional
     @Override
@@ -73,13 +79,27 @@ public class OrderServiceImpl implements OrderService {
                                          int size) {
         Pageable pageable = PageRequest.of(number, size);
         Specification<Order> spec = OrderSpecification.filterBy(deleted, statuses, from, to);
-        return repository.findAll(spec, pageable).map(mapper::entityToDto);
+
+        Page<Order> orders = repository.findAll(spec, pageable);
+        List<Long> userIds = orders.stream()
+                .map(Order::getUserId)
+                .distinct()
+                .toList();
+        List<UserInfo> users = userClient.getUsersByIds(userIds);
+        Map<Long, UserInfo> userMap = users.stream()
+                .collect(Collectors.toMap(UserInfo::id, user -> user));
+
+        List<OrderDtoResponse> orderDtoList = orders.stream()
+                .map(order -> mapper.entityToDto(order, userMap.get(order.getUserId())))
+                .toList();
+        return new PageImpl<>(orderDtoList);
     }
 
     @Override
     public List<OrderDtoResponse> getByUserId(Long id) {
+        UserInfo user = userClient.getUserById(id);
         return repository.findByUserId(id).stream()
-                .map(mapper::entityToDto)
+                .map(order -> mapper.entityToDto(order, user))
                 .toList();
     }
 

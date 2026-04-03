@@ -41,5 +41,5 @@ resilience4j:
         waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 3
 
-userClient:
+webClient:
   url: http://localhost:8082

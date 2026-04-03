@@ -1,5 +1,6 @@
 package by.lobacevich.order.service.impl;
 
+import by.lobacevich.order.client.UserClient;
 import by.lobacevich.order.dto.request.OrderDtoRequest;
 import by.lobacevich.order.dto.request.StatusDtoRequest;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
@@ -28,6 +29,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +57,9 @@ class OrderServiceImplTest {
 
     @Mock
     private OrderItemService orderItemService;
+
+    @Mock
+    private UserClient userClient;
 
     @Mock
     private OrderDtoRequest dtoRequest;
@@ -148,7 +153,8 @@ class OrderServiceImplTest {
     @Test
     void getAll_ShouldReturnPageOfOrderDtoResponse() {
         when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(order)));
-        when(mapper.entityToDto(order)).thenReturn(dtoResponse);
+        when(userClient.getUsersByIds(any(List.class))).thenReturn(Collections.emptyList());
+        when(mapper.entityToDto(order, null)).thenReturn(dtoResponse);
 
         Page<OrderDtoResponse> actual = service.getAll(null, null, null, null, NUMBER, SIZE);
 
@@ -158,8 +164,9 @@ class OrderServiceImplTest {
     @Test
     void getByUserId_ShouldReturnListOfOrderDtoResponse() {
         when(repository.findByUserId(ID)).thenReturn(List.of(order));
-        when(mapper.entityToDto(order)).thenReturn(dtoResponse);
 
+        when(mapper.entityToDto(order, null)).thenReturn(dtoResponse);
+        when(userClient.getUserById(ID)).thenReturn(null);
         List<OrderDtoResponse> actual = service.getByUserId(ID);
 
         assertEquals(List.of(dtoResponse), actual);
