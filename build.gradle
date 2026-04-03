@@ -24,15 +24,13 @@ jacocoTestReport {
         html.required = true
         html.outputLocation = layout.buildDirectory.dir('reports/jacoco/html')
     }
-}
-
-sonar {
-    properties {
-        property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.projectKey", "lobacevich_orderService"
-        property "sonar.organization", "lobacevich"
-        property "sonar.branch.name", "develop"
-        property "sonar.token", "77dc856f90bc1bd67f4f328a2002d4eeb104fa5b"
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/entity/**",
+                    "**/config/SwaggerConfig.class"
+            ])
+        }))
     }
 }
 
