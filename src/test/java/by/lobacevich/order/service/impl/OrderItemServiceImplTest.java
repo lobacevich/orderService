@@ -13,8 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,7 +57,8 @@ class OrderItemServiceImplTest {
     @Test
     void buildOrderItems_ShouldReturnListOfOrderItem() {
         when(dtoRequest.itemId()).thenReturn(ID);
-        when(itemRepository.findById(ID)).thenReturn(Optional.of(item));
+        when(itemRepository.findAllById(List.of(ID))).thenReturn(List.of(item));
+        when(item.getId()).thenReturn(ID);
 
         List<OrderItem> actual = service.buildOrderItems(List.of(dtoRequest), order);
 
@@ -71,7 +72,7 @@ class OrderItemServiceImplTest {
         List<OrderItemDtoRequest> list = List.of(dtoRequest);
 
         when(dtoRequest.itemId()).thenReturn(ID);
-        when(itemRepository.findById(ID)).thenReturn(Optional.empty());
+        when(itemRepository.findAllById(List.of(ID))).thenReturn(Collections.emptyList());
 
         assertThrows(EntityNotFoundException.class, () -> service.buildOrderItems(list, order));
     }

@@ -18,19 +18,9 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
 }
 
-jacocoTestReport {
-    reports {
-        xml.required = true
-        html.required = true
-        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/html')
-    }
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    "**/entity/**",
-                    "**/config/SwaggerConfig.class"
-            ])
-        }))
+sonar {
+    properties {
+        property "sonar.coverage.exclusions", "**/config/SwaggerConfig.java"
     }
 }
 
