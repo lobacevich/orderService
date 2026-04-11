@@ -18,9 +18,15 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
 }
 
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+}
+
 sonar {
     properties {
-        property "sonar.coverage.exclusions", "**/config/SwaggerConfig.java"
+        property "sonar.coverage.exclusions", "**/config/SwaggerConfig.java, **/entity/**"
     }
 }
 

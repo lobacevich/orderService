@@ -5,30 +5,24 @@ import by.lobacevich.order.dto.request.OrderDtoRequest;
 import by.lobacevich.order.dto.request.StatusDtoRequest;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
 import by.lobacevich.order.dto.response.OrderDtoResponseFull;
+import by.lobacevich.order.dto.response.UserInfo;
 import by.lobacevich.order.entity.Order;
-import by.lobacevich.order.entity.OrderItem;
 import by.lobacevich.order.entity.enums.OrderStatus;
 import by.lobacevich.order.exception.EntityNotFoundException;
 import by.lobacevich.order.mapper.OrderMapper;
 import by.lobacevich.order.repository.OrderRepository;
-import by.lobacevich.order.security.SecurityUtils;
-import by.lobacevich.order.service.OrderItemService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +30,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,7 +38,6 @@ import static org.mockito.Mockito.when;
 class OrderServiceImplTest {
 
     public static final Long ID = 1L;
-    public static final BigDecimal TOTAL_PRICE = BigDecimal.valueOf(5.17);
     public static final int NUMBER = 0;
     public static final int SIZE = 2;
 
@@ -56,7 +48,7 @@ class OrderServiceImplTest {
     private OrderMapper mapper;
 
     @Mock
-    private OrderItemService orderItemService;
+    private OrderTxService orderTxService;
 
     @Mock
     private UserClient userClient;
@@ -71,72 +63,45 @@ class OrderServiceImplTest {
     private OrderDtoResponse dtoResponse;
 
     @Mock
-    private OrderItem orderItem;
+    private Order order;
 
     @Mock
-    private Order order;
+    private UserInfo userInfo;
 
     @InjectMocks
     private OrderServiceImpl service;
 
-    @Captor
-    private ArgumentCaptor<Order> orderCaptor;
-
     @Test
     void create_ShouldCallSaveMethodOfRepositoryAndReturnOrderDtoResponseFull() {
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = Mockito.mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(ID);
-            when(orderItemService.buildOrderItems(anyList(), any(Order.class))).thenReturn(List.of(orderItem));
-            when(orderItemService.calculateTotalPrice(List.of(orderItem))).thenReturn(TOTAL_PRICE);
-            when(repository.save(any(Order.class))).thenReturn(order);
-            when(mapper.entityToDtoFull(order)).thenReturn(dtoResponseFull);
+        when(orderTxService.createOrderTx(dtoRequest)).thenReturn(order);
+        when(order.getUserId()).thenReturn(ID);
+        when(userClient.getUserById(ID)).thenReturn(userInfo);
+        when(mapper.entityToDtoFull(order, userInfo)).thenReturn(dtoResponseFull);
 
-            service.create(dtoRequest);
+        OrderDtoResponseFull actual = service.create(dtoRequest);
 
-            verify(repository, times(1)).save(orderCaptor.capture());
+        assertEquals(dtoResponseFull, actual);
 
-            Order saved = orderCaptor.getValue();
-
-            assertEquals(ID, saved.getUserId());
-            assertEquals(List.of(orderItem), saved.getOrderItems());
-            assertEquals(TOTAL_PRICE, saved.getTotalPrice());
-        }
     }
 
     @Test
     void update_ShouldReturnOrderDtoResponseFull() {
-        List<OrderItem> orderItems = new ArrayList<>();
-        Order realOrder = new Order();
-        realOrder.setOrderItems(orderItems);
+        when(orderTxService.updateOrderTx(dtoRequest, ID)).thenReturn(order);
+        when(order.getUserId()).thenReturn(ID);
+        when(userClient.getUserById(ID)).thenReturn(userInfo);
+        when(mapper.entityToDtoFull(order, userInfo)).thenReturn(dtoResponseFull);
 
-        when(repository.findById(ID)).thenReturn(Optional.of(realOrder));
-        when(dtoRequest.orderItems()).thenReturn(List.of());
-        when(orderItemService.buildOrderItems(anyList(), any(Order.class))).thenReturn(List.of(orderItem));
-        when(orderItemService.calculateTotalPrice(List.of(orderItem))).thenReturn(TOTAL_PRICE);
-        when(repository.save(any(Order.class))).thenReturn(order);
-        when(mapper.entityToDtoFull(order)).thenReturn(dtoResponseFull);
+        OrderDtoResponseFull actual = service.update(dtoRequest, ID);
 
-        service.update(dtoRequest, ID);
-
-        verify(repository, times(1)).save(orderCaptor.capture());
-
-        Order saved = orderCaptor.getValue();
-
-        assertEquals(orderItem, saved.getOrderItems().getFirst());
-        assertEquals(TOTAL_PRICE, saved.getTotalPrice());
-    }
-
-    @Test
-    void update_ShouldThrowEntityNotFoundException() {
-        when(repository.findById(ID)).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class, () -> service.update(dtoRequest, ID));
+        assertEquals(dtoResponseFull, actual);
     }
 
     @Test
     void getById_ShouldReturnOrderDtoResponseFull() {
         when(repository.findById(ID)).thenReturn(Optional.of(order));
-        when(mapper.entityToDtoFull(order)).thenReturn(dtoResponseFull);
+        when(order.getUserId()).thenReturn(ID);
+        when(userClient.getUserById(ID)).thenReturn(userInfo);
+        when(mapper.entityToDtoFull(order, userInfo)).thenReturn(dtoResponseFull);
 
         OrderDtoResponseFull actual = service.getById(ID);
 
@@ -174,27 +139,15 @@ class OrderServiceImplTest {
 
     @Test
     void setStatus_ShouldSaveOrderWithNewStatusAndReturnOrderDtoResponseFull() {
-        when(repository.findById(ID)).thenReturn(Optional.of(new Order()));
-        when(repository.save(any(Order.class))).thenReturn(order);
-        when(mapper.entityToDtoFull(order)).thenReturn(dtoResponseFull);
+        StatusDtoRequest statusDtoRequest = new StatusDtoRequest(OrderStatus.PAID);
+        when(orderTxService.setStatusTx(statusDtoRequest, ID)).thenReturn(order);
+        when(order.getUserId()).thenReturn(ID);
+        when(userClient.getUserById(ID)).thenReturn(userInfo);
+        when(mapper.entityToDtoFull(order, userInfo)).thenReturn(dtoResponseFull);
 
-        OrderDtoResponseFull actual = service.setStatus(new StatusDtoRequest(OrderStatus.PAID), ID);
+        OrderDtoResponseFull actual = service.setStatus(statusDtoRequest, ID);
 
         assertEquals(dtoResponseFull, actual);
-        verify(repository, times(1)).save(orderCaptor.capture());
-
-        Order saved = orderCaptor.getValue();
-
-        assertEquals(OrderStatus.PAID, saved.getStatus());
-    }
-
-    @Test
-    void setStatus_ShouldThrowEntityNotFoundException() {
-        StatusDtoRequest statusDtoRequest = new StatusDtoRequest(OrderStatus.PAID);
-
-        when(repository.findById(ID)).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class, () -> service.setStatus(statusDtoRequest, ID));
     }
 
     @Test

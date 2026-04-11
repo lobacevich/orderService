@@ -1,23 +1,20 @@
 package by.lobacevich.order.service.impl;
 
 import by.lobacevich.order.client.UserClient;
-import by.lobacevich.order.dto.response.UserInfo;
 import by.lobacevich.order.dto.request.OrderDtoRequest;
 import by.lobacevich.order.dto.request.StatusDtoRequest;
 import by.lobacevich.order.dto.response.OrderDtoResponse;
 import by.lobacevich.order.dto.response.OrderDtoResponseFull;
+import by.lobacevich.order.dto.response.UserInfo;
 import by.lobacevich.order.entity.Order;
-import by.lobacevich.order.entity.OrderItem;
 import by.lobacevich.order.entity.enums.OrderStatus;
 import by.lobacevich.order.exception.EntityNotFoundException;
 import by.lobacevich.order.mapper.OrderMapper;
 import by.lobacevich.order.repository.OrderRepository;
 import by.lobacevich.order.security.SecurityUtils;
-import by.lobacevich.order.service.OrderItemService;
 import by.lobacevich.order.service.OrderService;
 import by.lobacevich.order.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,45 +28,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Log4j2
 @RequiredArgsConstructor
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private static final String MESSAGE_NOT_FOUND = "Order not found with id ";
+    private static final String MESSAGE_NOT_FOUND = "Order not found for id ";
 
     private final OrderRepository repository;
     private final OrderMapper mapper;
-    private final OrderItemService orderItemService;
     private final UserClient userClient;
+    private final OrderTxService orderTxService;
 
-    @Transactional
     @Override
     public OrderDtoResponseFull create(OrderDtoRequest dtoRequest) {
-        Order order = new Order();
-        order.setUserId(SecurityUtils.getCurrentUserId());
-        List<OrderItem> orderItems = orderItemService.buildOrderItems(dtoRequest.orderItems(), order);
-        order.setOrderItems(orderItems);
-        order.setTotalPrice(orderItemService.calculateTotalPrice(orderItems));
-        return mapper.entityToDtoFull(repository.save(order));
+        Order order = orderTxService.createOrderTx(dtoRequest);
+        return mapper.entityToDtoFull(order, userClient.getUserById(order.getUserId()));
     }
 
     @Transactional
     @Override
     public OrderDtoResponseFull update(OrderDtoRequest dtoRequest, Long id) {
-        Order order = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(MESSAGE_NOT_FOUND + id));
-        List<OrderItem> orderItems = order.getOrderItems();
-        orderItems.clear();
-        orderItems.addAll(orderItemService.buildOrderItems(dtoRequest.orderItems(), order));
-        order.setTotalPrice(orderItemService.calculateTotalPrice(orderItems));
-        return mapper.entityToDtoFull(repository.save(order));
+        Order order = orderTxService.updateOrderTx(dtoRequest, id);
+        return mapper.entityToDtoFull(order, userClient.getUserById(order.getUserId()));
     }
 
     @Override
     public OrderDtoResponseFull getById(Long id) {
-        return mapper.entityToDtoFull(repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(MESSAGE_NOT_FOUND + id)));
+        Order order = repository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(MESSAGE_NOT_FOUND + id));
+        return mapper.entityToDtoFull(order, userClient.getUserById(order.getUserId()));
     }
 
     @Override
@@ -105,13 +92,10 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
-    @Transactional
     @Override
     public OrderDtoResponseFull setStatus(StatusDtoRequest statusDtoRequest, Long id) {
-        Order order = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(MESSAGE_NOT_FOUND + id));
-        order.setStatus(statusDtoRequest.status());
-        return mapper.entityToDtoFull(repository.save(order));
+        Order order = orderTxService.setStatusTx(statusDtoRequest, id);
+        return mapper.entityToDtoFull(order, userClient.getUserById(order.getUserId()));
     }
 
     @Transactional
