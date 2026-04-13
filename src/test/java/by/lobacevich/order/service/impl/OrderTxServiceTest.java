@@ -1,0 +1,133 @@
+package by.lobacevich.order.service.impl;
+
+import by.lobacevich.order.dto.request.OrderDtoRequest;
+import by.lobacevich.order.dto.request.StatusDtoRequest;
+import by.lobacevich.order.entity.Order;
+import by.lobacevich.order.entity.OrderItem;
+import by.lobacevich.order.entity.enums.OrderStatus;
+import by.lobacevich.order.exception.EntityNotFoundException;
+import by.lobacevich.order.repository.OrderRepository;
+import by.lobacevich.order.security.SecurityUtils;
+import by.lobacevich.order.service.OrderItemService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class OrderTxServiceTest {
+
+    private static final Long ID = 1L;
+    private static final BigDecimal TOTAL_PRICE = BigDecimal.valueOf(5.17);
+
+    @Mock
+    private OrderRepository repository;
+
+    @Mock
+    private OrderItemService orderItemService;
+
+    @Mock
+    private OrderDtoRequest dtoRequest;
+
+    @Mock
+    private OrderItem orderItem;
+
+    @Mock
+    private Order order;
+
+    @InjectMocks
+    private OrderTxService service;
+
+    @Captor
+    private ArgumentCaptor<Order> orderCaptor;
+
+    @Test
+    void createOrderTx_ShouldReturnOrder() {
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(ID);
+            when(orderItemService.buildOrderItems(anyList(), any(Order.class))).thenReturn(List.of(orderItem));
+            when(orderItemService.calculateTotalPrice(List.of(orderItem))).thenReturn(TOTAL_PRICE);
+            when(repository.save(any(Order.class))).thenReturn(order);
+
+            service.createOrderTx(dtoRequest);
+
+            verify(repository, times(1)).save(orderCaptor.capture());
+
+            Order saved = orderCaptor.getValue();
+
+            assertEquals(ID, saved.getUserId());
+            assertEquals(List.of(orderItem), saved.getOrderItems());
+            assertEquals(TOTAL_PRICE, saved.getTotalPrice());
+        }
+    }
+
+    @Test
+    void updateOrderTx_ShouldReturnUpdatedOrder() {
+        List<OrderItem> orderItems = new ArrayList<>();
+        Order realOrder = new Order();
+        realOrder.setOrderItems(orderItems);
+
+        when(repository.findById(ID)).thenReturn(Optional.of(realOrder));
+        when(dtoRequest.orderItems()).thenReturn(List.of());
+        when(orderItemService.buildOrderItems(anyList(), any(Order.class))).thenReturn(List.of(orderItem));
+        when(orderItemService.calculateTotalPrice(List.of(orderItem))).thenReturn(TOTAL_PRICE);
+        when(repository.save(any(Order.class))).thenReturn(order);
+
+        service.updateOrderTx(dtoRequest, ID);
+
+        verify(repository, times(1)).save(orderCaptor.capture());
+
+        Order saved = orderCaptor.getValue();
+
+        assertEquals(orderItem, saved.getOrderItems().getFirst());
+        assertEquals(TOTAL_PRICE, saved.getTotalPrice());
+    }
+
+    @Test
+    void updateOrderTx_ShouldThrowEntityNotFoundException() {
+        when(repository.findById(ID)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> service.updateOrderTx(dtoRequest, ID));
+    }
+
+    @Test
+    void setStatusTx_ShouldSaveOrderWithNewStatusAndReturnOrder() {
+        when(repository.findById(ID)).thenReturn(Optional.of(new Order()));
+        when(repository.save(any(Order.class))).thenReturn(order);
+
+        service.setStatusTx(new StatusDtoRequest(OrderStatus.PAID), ID);
+
+        verify(repository, times(1)).save(orderCaptor.capture());
+
+        Order saved = orderCaptor.getValue();
+
+        assertEquals(OrderStatus.PAID, saved.getStatus());
+    }
+
+    @Test
+    void setStatusTx_ShouldThrowEntityNotFoundException() {
+        StatusDtoRequest statusDtoRequest = new StatusDtoRequest(OrderStatus.PAID);
+
+        when(repository.findById(ID)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> service.setStatusTx(statusDtoRequest, ID));
+    }
+}
