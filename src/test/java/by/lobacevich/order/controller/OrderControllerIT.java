@@ -13,11 +13,11 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -110,7 +110,9 @@ class OrderControllerIT extends BaseIntegrationTest {
     void getAll_ShouldReturnListOfOrderDtoResponse() throws Exception {
         wireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/users/batch"))
                 .willReturn(WireMock.aResponse()
-                        .withStatus(200)));
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[]")));
         mockMvc.perform(get("/orders")
                         .header("X-User-Id", "1")
                         .header("X-Role", "ROLE_ADMIN"))
