@@ -13,6 +13,7 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_DRIVER: org.postgresql.Driver
+      USER_SERVICE_URL: http://user-service:8082
 
   postgres:
     image: postgres:17.6
