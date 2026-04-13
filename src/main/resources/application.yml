@@ -40,6 +40,8 @@ resilience4j:
         failureRateThreshold: 50
         waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 3
+        ignoreExceptions:
+          - by.lobacevich.order.exception.ClientErrorException
 
 webClient:
   url: http://localhost:8082

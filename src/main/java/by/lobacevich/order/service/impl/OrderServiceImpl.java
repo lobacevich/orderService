@@ -45,7 +45,6 @@ public class OrderServiceImpl implements OrderService {
         return mapper.entityToDtoFull(order, userClient.getUserById(order.getUserId()));
     }
 
-    @Transactional
     @Override
     public OrderDtoResponseFull update(OrderDtoRequest dtoRequest, Long id) {
         Order order = orderTxService.updateOrderTx(dtoRequest, id);
