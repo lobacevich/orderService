@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    private static final String[] PERMIT_ALL = {"/swagger-ui/**", "/v3/api-docs/**"};
+    private static final String[] PERMIT_ALL = {"/swagger-ui/**", "/v3/api-docs/**", "/actuator/health"};
 
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
