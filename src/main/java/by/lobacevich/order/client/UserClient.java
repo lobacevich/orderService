@@ -38,10 +38,10 @@ public class UserClient {
                     }
                     if (response.statusCode().is4xxClientError()) {
                         return response.bodyToMono(String.class)
-                                .flatMap(body -> Mono.error(new ClientErrorException(body)));
+                                .flatMap(body -> Mono.error(new ClientErrorException(body, response.statusCode())));
                     }
                     return response.bodyToMono(String.class)
-                            .flatMap(body -> Mono.error(new ServerErrorException(body)));
+                            .flatMap(body -> Mono.error(new ServerErrorException(body, response.statusCode())));
                 })
                 .block();
     }
@@ -65,10 +65,10 @@ public class UserClient {
                     }
                     if (response.statusCode().is4xxClientError()) {
                         return response.bodyToMono(String.class)
-                                .flatMap(body -> Mono.error(new ClientErrorException(body)));
+                                .flatMap(body -> Mono.error(new ClientErrorException(body, response.statusCode())));
                     }
                     return response.bodyToMono(String.class)
-                            .flatMap(body -> Mono.error(new ServerErrorException(body)));
+                            .flatMap(body -> Mono.error(new ServerErrorException(body, response.statusCode())));
                 })
                 .block();
     }

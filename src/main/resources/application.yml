@@ -13,7 +13,7 @@ spring:
 
   liquibase:
     enabled: true
-    drop-first: true
+    drop-first: false
     change-log: classpath:db/changelog/changelog.yaml
 
   jpa:
@@ -24,6 +24,16 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+
+  kafka:
+    bootstrap-servers: localhost:9093
+    consumer:
+      group-id: order-group
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: by.lobacevich.order.kafka.event.PaymentCreatedEvent
 
 logging:
   level:
@@ -45,3 +55,6 @@ resilience4j:
 
 webClient:
   url: http://localhost:8082
+
+server:
+  port: 8083
